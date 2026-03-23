@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin — Arcadia Library</title>
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body class="dashboard-body">
+<div id="toastContainer" class="toast-container"></div>
+<div id="sidebarOverlay" class="sidebar-overlay"></div>
+
+<!-- ══ SIDEBAR ══════════════════════════════════════════ -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-mark">📚</div>
+    <div class="logo-text">
+      <h2>Arcadia</h2>
+      <span>Admin Panel</span>
+    </div>
+  </div>
+
+  <div class="sidebar-user">
+    <div class="user-avatar" id="adminAvatar">A</div>
+    <div class="user-info">
+      <div class="user-name" id="adminDisplayName">Admin</div>
+      <div class="user-role" style="color:var(--teal)">Library Staff</div>
+    </div>
+  </div>
+
+  <nav class="sidebar-nav">
+    <div class="nav-section-label">Overview</div>
+    <a class="nav-item" data-section="sec-dashboard">
+      <span class="nav-icon">📊</span> Dashboard
+    </a>
+
+    <div class="nav-section-label">Management</div>
+    <a class="nav-item" data-section="sec-requests">
+      <span class="nav-icon">📋</span> Borrow Requests
+      <span class="nav-badge" id="requestsBadge" style="display:none">0</span>
+    </a>
+    <a class="nav-item" data-section="sec-books">
+      <span class="nav-icon">📚</span> Book Catalog
+    </a>
+    <a class="nav-item" data-section="sec-users">
+      <span class="nav-icon">👥</span> Students
+    </a>
+
+  <div class="sidebar-footer">
+    <button class="btn-logout" id="btnLogoutAdmin">
+      <span>↩</span> Sign Out
+    </button>
+  </div>
+</aside>
+
+<!-- ══ MAIN ══════════════════════════════════════════════ -->
+<div class="main-content">
+
+  <header class="topbar">
+    <button class="mobile-menu-btn" id="mobileMenuBtn">☰</button>
+    <div class="topbar-title">
+      <h1>Library Administration</h1>
+      <p>Manage books, requests, and student records</p>
+    </div>
+    <div class="topbar-actions">
+      <button class="btn btn-primary btn-sm" id="btnAddBookTop">+ Add Book</button>
+    </div>
+  </header>
+
+  <main class="page-content">
+
+    <!-- ── DASHBOARD ──────────────────────────────────────── -->
+    <section class="section" id="sec-dashboard">
+      <div class="stats-grid" style="grid-template-columns:repeat(auto-fit,minmax(180px,1fr))">
+        <div class="stat-card amber">
+          <span class="stat-icon">📚</span>
+          <div class="stat-label">Total Books</div>
+          <div class="stat-value" id="dTotalBooks">0</div>
+        </div>
+        <div class="stat-card sage">
+          <span class="stat-icon">✓</span>
+          <div class="stat-label">Available</div>
+          <div class="stat-value" id="dAvailBooks">0</div>
+        </div>
+        <div class="stat-card rose">
+          <span class="stat-icon">⏳</span>
+          <div class="stat-label">Pending</div>
+          <div class="stat-value" id="dPending">0</div>
+        </div>
+        <div class="stat-card teal">
+          <span class="stat-icon">📖</span>
+          <div class="stat-label">Borrowed</div>
+          <div class="stat-value" id="dBorrowed">0</div>
+        </div>
+        <div class="stat-card lavender">
+          <span class="stat-icon">👥</span>
+          <div class="stat-label">Students</div>
+          <div class="stat-value" id="dTotalStudents">0</div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">
+          <h3>📋 Recent Borrow Requests</h3>
+          <button class="btn btn-secondary btn-sm" onclick="App.showSection('sec-requests')">View All</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Student</th><th>Book</th><th>Date</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody id="recentRequestsTable"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── BORROW REQUESTS ───────────────────────────────── -->
+    <section class="section" id="sec-requests">
+      <div class="panel">
+        <div class="panel-header">
+          <h3>📋 All Borrow Requests</h3>
+          <div class="filters-row">
+            <select id="requestFilter">
+              <option value="all">All Statuses</option>
+              <option value="pending">Pending</option>
+              <option value="approved">Approved</option>
+              <option value="ready">Ready for Pickup</option>
+              <option value="rejected">Rejected</option>
+              <option value="returned">Returned</option>
+            </select>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Student</th>
+                <th>Year / Course</th>
+                <th>Book</th>
+                <th>Requested</th>
+                <th>Due Date</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="requestsTable"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── BOOKS ─────────────────────────────────────────── -->
+    <section class="section" id="sec-books">
+      <div class="panel">
+        <div class="panel-header">
+          <h3>📚 Book Catalog</h3>
+          <div style="display:flex;gap:0.75rem;align-items:center;flex-wrap:wrap">
+            <div class="search-bar" style="min-width:180px">
+              <span class="search-icon">🔍</span>
+              <input type="text" id="adminBookSearch" placeholder="Search books…">
+            </div>
+            <button class="btn btn-primary btn-sm" id="btnAddBook">+ Add Book</button>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th></th>
+                <th>Title</th>
+                <th>Author</th>
+                <th>Category</th>
+                <th>ISBN</th>
+                <th>Copies</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="booksTable"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── STUDENTS ──────────────────────────────────────── -->
+    <section class="section" id="sec-users">
+      <div class="panel">
+        <div class="panel-header"><h3>👥 Registered Students</h3></div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Student</th>
+                <th>Student ID</th>
+                <th>Course</th>
+                <th>Year Level</th>
+                <th>Total Requests</th>
+                <th>Active Borrows</th>
+                <th>Registered</th>
+              </tr>
+            </thead>
+            <tbody id="usersTable"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── DATABASE SCHEMA ───────────────────────────────── -->
+    <section class="section" id="sec-schema">
+      <div class="panel" style="margin-bottom:1.5rem">
+        <div class="panel-header"><h3>🗄 MySQL Database Schema (ERD + SQL)</h3></div>
+        <div class="panel-body">
+          <p style="color:var(--text-secondary);font-size:0.875rem;margin-bottom:1.5rem">
+            This system uses <strong style="color:var(--amber)">localStorage</strong> as a client-side database simulation.
+            Below is the equivalent MySQL schema you would use in a full PHP/MySQL backend deployment.
+          </p>
+
+          <h4 style="font-family:var(--font-display);margin-bottom:0.75rem;font-size:1rem">📊 Entity Relationship</h4>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;margin-bottom:2rem">
+            <div class="stat-card teal" style="padding:1rem">
+              <div style="font-weight:700;color:var(--teal);font-family:var(--font-mono);margin-bottom:0.5rem">users</div>
+              <div style="font-size:0.78rem;color:var(--text-secondary);line-height:1.8">id (PK)<br>name<br>email (UNIQUE)<br>password<br>role (ENUM)<br>student_id<br>course<br>year_level<br>address<br>created_at</div>
+            </div>
+            <div class="stat-card amber" style="padding:1rem">
+              <div style="font-weight:700;color:var(--amber);font-family:var(--font-mono);margin-bottom:0.5rem">books</div>
+              <div style="font-size:0.78rem;color:var(--text-secondary);line-height:1.8">id (PK)<br>title<br>author<br>category<br>isbn (UNIQUE)<br>description<br>cover_url<br>total_copies<br>available_copies<br>added_at</div>
+            </div>
+            <div class="stat-card rose" style="padding:1rem">
+              <div style="font-weight:700;color:var(--rose);font-family:var(--font-mono);margin-bottom:0.5rem">borrow_requests</div>
+              <div style="font-size:0.78rem;color:var(--text-secondary);line-height:1.8">id (PK)<br>book_id (FK→books)<br>user_id (FK→users)<br>student_name<br>student_id_no<br>year_level<br>course<br>address<br>status (ENUM)<br>requested_at<br>due_date<br>returned_at<br>admin_note</div>
+            </div>
+          </div>
+
+          <h4 style="font-family:var(--font-display);margin-bottom:0.75rem;font-size:1rem">📄 SQL DDL</h4>
+          <div class="sql-block"><span class="sql-comment">-- Arcadia Library Management System</span>
+<span class="sql-comment">-- MySQL 8.0+ compatible schema</span>
+
+<span class="sql-kw">CREATE DATABASE</span> arcadia_library <span class="sql-kw">CHARACTER SET</span> utf8mb4;
+<span class="sql-kw">USE</span> arcadia_library;
+
+<span class="sql-comment">-- Users table (students + admin)</span>
+<span class="sql-kw">CREATE TABLE</span> users (
+  id            <span class="sql-type">INT AUTO_INCREMENT PRIMARY KEY</span>,
+  name          <span class="sql-type">VARCHAR(150)</span> <span class="sql-kw">NOT NULL</span>,
+  email         <span class="sql-type">VARCHAR(255)</span> <span class="sql-kw">NOT NULL UNIQUE</span>,
+  password_hash <span class="sql-type">VARCHAR(255)</span> <span class="sql-kw">NOT NULL</span>,
+  role          <span class="sql-type">ENUM('student','admin')</span> <span class="sql-kw">DEFAULT</span> 'student',
+  student_id    <span class="sql-type">VARCHAR(50)</span>,
+  course        <span class="sql-type">VARCHAR(150)</span>,
+  year_level    <span class="sql-type">VARCHAR(30)</span>,
+  address       <span class="sql-type">TEXT</span>,
+  created_at    <span class="sql-type">TIMESTAMP DEFAULT CURRENT_TIMESTAMP</span>
+);
+
+<span class="sql-comment">-- Books table</span>
+<span class="sql-kw">CREATE TABLE</span> books (
+  id               <span class="sql-type">INT AUTO_INCREMENT PRIMARY KEY</span>,
+  title            <span class="sql-type">VARCHAR(255)</span> <span class="sql-kw">NOT NULL</span>,
+  author           <span class="sql-type">VARCHAR(150)</span> <span class="sql-kw">NOT NULL</span>,
+  category         <span class="sql-type">VARCHAR(80)</span>,
+  isbn             <span class="sql-type">VARCHAR(20) UNIQUE</span>,
+  description      <span class="sql-type">TEXT</span>,
+  cover_url        <span class="sql-type">VARCHAR(500)</span>,
+  total_copies     <span class="sql-type">INT DEFAULT 1</span>,
+  available_copies <span class="sql-type">INT DEFAULT 1</span>,
+  added_at         <span class="sql-type">TIMESTAMP DEFAULT CURRENT_TIMESTAMP</span>
+);
+
+<span class="sql-comment">-- Borrow requests / transactions</span>
+<span class="sql-kw">CREATE TABLE</span> borrow_requests (
+  id            <span class="sql-type">INT AUTO_INCREMENT PRIMARY KEY</span>,
+  book_id       <span class="sql-type">INT NOT NULL</span>,
+  user_id       <span class="sql-type">INT NOT NULL</span>,
+  student_name  <span class="sql-type">VARCHAR(150)</span>,
+  student_id_no <span class="sql-type">VARCHAR(50)</span>,
+  year_level    <span class="sql-type">VARCHAR(30)</span>,
+  course        <span class="sql-type">VARCHAR(150)</span>,
+  address       <span class="sql-type">TEXT</span>,
+  status        <span class="sql-type">ENUM('pending','approved','ready','rejected','returned')</span>
+                <span class="sql-kw">DEFAULT</span> 'pending',
+  requested_at  <span class="sql-type">TIMESTAMP DEFAULT CURRENT_TIMESTAMP</span>,
+  due_date      <span class="sql-type">DATE</span>,
+  returned_at   <span class="sql-type">DATE</span>,
+  admin_note    <span class="sql-type">TEXT</span>,
+  <span class="sql-kw">FOREIGN KEY</span> (book_id) <span class="sql-kw">REFERENCES</span> books(id) <span class="sql-kw">ON DELETE CASCADE</span>,
+  <span class="sql-kw">FOREIGN KEY</span> (user_id) <span class="sql-kw">REFERENCES</span> users(id) <span class="sql-kw">ON DELETE CASCADE</span>
+);
+
+<span class="sql-comment">-- Indexes for performance</span>
+<span class="sql-kw">CREATE INDEX</span> idx_requests_status <span class="sql-kw">ON</span> borrow_requests(status);
+<span class="sql-kw">CREATE INDEX</span> idx_requests_user   <span class="sql-kw">ON</span> borrow_requests(user_id);
+<span class="sql-kw">CREATE INDEX</span> idx_books_category  <span class="sql-kw">ON</span> books(category);</div>
+
+          <div style="margin-top:1.5rem">
+            <h4 style="font-family:var(--font-display);margin-bottom:0.75rem;font-size:1rem">🐘 PHP Backend (Snippet)</h4>
+            <div class="sql-block"><span class="sql-comment">// api/borrow.php — Example PHP endpoint</span>
+<span class="sql-kw">header</span>('Content-Type: application/json');
+<span class="sql-kw">require_once</span> 'db_connect.php'; <span class="sql-comment">// PDO connection</span>
+
+<span class="sql-kw">if</span> ($_SERVER['REQUEST_METHOD'] === 'POST') {
+  $data = json_decode(file_get_contents('php://input'), true);
+  $stmt = $pdo->prepare(
+    "INSERT INTO borrow_requests
+     (book_id, user_id, student_name, student_id_no, year_level, course, address)
+     VALUES (:book_id, :user_id, :name, :sid, :year, :course, :addr)"
+  );
+  $stmt->execute([
+    'book_id' => $data['bookId'],
+    'user_id' => $data['userId'],
+    'name'    => $data['studentName'],
+    'sid'     => $data['studentId'],
+    'year'    => $data['yearLevel'],
+    'course'  => $data['course'],
+    'addr'    => $data['address'],
+  ]);
+  <span class="sql-comment">// Decrement available_copies</span>
+  $pdo->prepare("UPDATE books SET available_copies = available_copies - 1
+                 WHERE id = :id AND available_copies > 0")
+      ->execute(['id' => $data['bookId']]);
+  echo json_encode(['success' => true, 'id' => $pdo->lastInsertId()]);
+}</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- ══ BOOK FORM MODAL ══════════════════════════════════ -->
+<div class="modal-overlay" id="bookFormModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 id="bookFormTitle">Add New Book</h2>
+      <button class="modal-close">✕</button>
+    </div>
+    <div class="modal-body">
+      <form id="bookForm" class="add-book-form">
+        <div class="form-group">
+          <label>Title *</label>
+          <input type="text" id="bfTitle" placeholder="Book title" required>
+        </div>
+        <div class="form-group">
+          <label>Author *</label>
+          <input type="text" id="bfAuthor" placeholder="Author name" required>
+        </div>
+        <div class="form-group">
+          <label>Category</label>
+          <select id="bfCategory">
+            <option value="Technology">Technology</option>
+            <option value="Fiction">Fiction</option>
+            <option value="History">History</option>
+            <option value="Science">Science</option>
+            <option value="Self-Help">Self-Help</option>
+            <option value="Philosophy">Philosophy</option>
+            <option value="Psychology">Psychology</option>
+            <option value="Business">Business</option>
+            <option value="Mathematics">Mathematics</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>ISBN</label>
+          <input type="text" id="bfISBN" placeholder="978-0-000-00000-0">
+        </div>
+        <div class="form-group">
+          <label>Number of Copies</label>
+          <input type="number" id="bfCopies" placeholder="1" min="1" value="1">
+        </div>
+        <div class="form-group">
+          <label>Cover Image URL</label>
+          <input type="text" id="bfCover" placeholder="https://...">
+        </div>
+        <div class="form-group full">
+          <label>Description</label>
+          <textarea id="bfDescription" placeholder="Book description…"></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary full" style="grid-column:1/-1">Save Book</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script src="../js/db.js"></script>
+<script src="../js/app.js"></script>
+<script>
+  AdminDash.init();
+  window.AdminDash = AdminDash;
+</script>
+</body>
+</html>
